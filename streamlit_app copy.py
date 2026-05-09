@@ -1,7 +1,7 @@
 """
 HSRIS - Hybrid Semantic Retrieval and Intelligence System
 Streamlit App - Interactive Demo
-Author: Maryam Shehzadi (23F-3030) | SE-6B
+Authors: Ali Naqi (23F-3052) & Muhammad Aamir (23F-3073) | SE-6B
 """
 import streamlit as st
 import torch
@@ -17,21 +17,21 @@ from collections import Counter
 # ======================================================================
 # PAGE CONFIG
 # ======================================================================
-st.set_page_config(page_title="HSRIS | Smart Search Engine", page_icon="🔍", layout="wide")
+st.set_page_config(page_title="HSRIS | Hybrid Search", page_icon="H", layout="wide")
 
 # ======================================================================
-# INJECT CUSTOM CSS (White & Orange Theme - Distinct Dark Orange Header)
+# INJECT CUSTOM CSS (Advanced Styling)
 # ======================================================================
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
     /* ── Global Reset ── */
     html, body, [class*="css"] {
         font-family: 'Inter', sans-serif;
     }
     .stApp {
-        background: linear-gradient(135deg, #ffffff 0%, #fff5eb 50%, #ffffff 100%);
+        background: linear-gradient(135deg, #0a0a1a 0%, #0d1b2a 30%, #1b263b 60%, #0d1b2a 100%);
     }
 
     /* ── Hide default streamlit branding ── */
@@ -39,164 +39,104 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-    /* ── DISTINCT DARK ORANGE HEADER ── */
-    .modern-header {
-        background: linear-gradient(135deg, #D35400 0%, #E65100 30%, #FF8C00 100%);
-        border-radius: 32px;
-        padding: 32px 48px;
+    /* ── Animated Header Banner ── */
+    .hero-banner {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        background-size: 200% 200%;
+        animation: gradientFlow 6s ease infinite;
+        border-radius: 24px;
+        padding: 48px 40px 40px;
         margin-bottom: 32px;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 15px 40px rgba(211, 84, 0, 0.25);
+        box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3), 0 0 0 1px rgba(255,255,255,0.08);
     }
-    .modern-header::before {
+    .hero-banner::before {
         content: '';
-        position: absolute;
-        top: -50%;
-        right: -20%;
-        width: 300px;
-        height: 300px;
-        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
-        border-radius: 50%;
-        pointer-events: none;
+        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.4;
     }
-    .modern-header::after {
-        content: '';
-        position: absolute;
-        bottom: -30%;
-        left: -10%;
-        width: 250px;
-        height: 250px;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        border-radius: 50%;
-        pointer-events: none;
-    }
-    .header-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        flex-wrap: wrap;
-        margin-bottom: 24px;
-        position: relative;
-        z-index: 2;
-    }
-    .title-section h1 {
-        font-size: 3rem;
-        font-weight: 800;
-        color: #ffffff;
-        margin: 0;
+    .hero-banner h1 {
+        font-size: 2.4rem;
+        font-weight: 900;
+        color: #fff;
         letter-spacing: -0.02em;
         line-height: 1.1;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .title-section .tagline {
-        font-size: 0.95rem;
-        color: rgba(255,255,255,0.85);
-        margin-top: 8px;
-        letter-spacing: 0.3px;
-    }
-    .badge-cloud {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: flex-end;
-    }
-    .tech-badge {
-        background: rgba(255,255,255,0.2);
-        backdrop-filter: blur(8px);
-        color: white;
-        padding: 6px 18px;
-        border-radius: 40px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 0.02em;
-        transition: all 0.2s ease;
-        border: 1px solid rgba(255,255,255,0.25);
-    }
-    .tech-badge:hover {
-        background: rgba(255,255,255,0.3);
-        transform: translateY(-2px);
-    }
-    .name-badge {
-        background: #ffffff;
-        color: #E65100;
-        padding: 6px 18px;
-        border-radius: 40px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        border: none;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-    .header-footer {
-        border-top: 1px solid rgba(255,255,255,0.25);
-        padding-top: 18px;
-        margin-top: 8px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
+        margin: 0 0 8px 0;
         position: relative;
-        z-index: 2;
+        text-shadow: 0 2px 20px rgba(0,0,0,0.2);
     }
-    .system-title {
-        font-weight: 500;
-        color: rgba(255,255,255,0.9);
-        font-size: 0.85rem;
+    .hero-banner .subtitle {
+        color: rgba(255,255,255,0.85);
+        font-size: 1.05rem;
+        font-weight: 400;
+        margin: 0;
+        position: relative;
     }
-    .system-title span {
-        color: #FFD966;
-        font-weight: 700;
+    .hero-banner .badge-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        position: relative;
+        flex-wrap: wrap;
     }
-    .pill-status {
-        background: rgba(255,255,255,0.2);
-        padding: 4px 14px;
-        border-radius: 30px;
-        font-size: 0.7rem;
-        color: #ffffff;
-        font-weight: 500;
-        backdrop-filter: blur(4px);
+    .hero-badge {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 100px;
+        padding: 6px 16px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #fff;
+        letter-spacing: 0.02em;
     }
 
-    /* ── White Cards with Orange Accents ── */
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* ── Glass Cards ── */
     .glass-card {
-        background: rgba(255, 255, 255, 0.95);
+        background: rgba(255, 255, 255, 0.04);
         backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 140, 0, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px;
         padding: 28px 32px;
         margin-bottom: 20px;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     }
     .glass-card:hover {
-        border-color: #FF8C00;
-        box-shadow: 0 8px 32px rgba(255, 140, 0, 0.12);
+        border-color: rgba(102, 126, 234, 0.3);
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
         transform: translateY(-2px);
     }
     .glass-card h3 {
         font-size: 1.1rem;
         font-weight: 700;
-        color: #2c3e50;
+        color: #e0e6ff;
         margin: 0 0 4px 0;
         letter-spacing: -0.01em;
     }
     .glass-card .card-subtitle {
         font-size: 0.82rem;
-        color: #7f8c8d;
+        color: rgba(255,255,255,0.45);
         margin-bottom: 16px;
     }
 
     /* ── Result Cards ── */
     .result-card {
-        background: #ffffff;
-        border: 1px solid rgba(255, 140, 0, 0.2);
+        background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+        border: 1px solid rgba(255,255,255,0.08);
         border-radius: 16px;
         padding: 24px 28px;
         margin-bottom: 16px;
         transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
     }
     .result-card::before {
         content: '';
@@ -205,13 +145,13 @@ st.markdown("""
         width: 4px; height: 100%;
         border-radius: 4px 0 0 4px;
     }
-    .result-card.rank-1::before { background: linear-gradient(to bottom, #FFD700, #FFA500); }
-    .result-card.rank-2::before { background: linear-gradient(to bottom, #C0C0C0, #A0A0A0); }
-    .result-card.rank-3::before { background: linear-gradient(to bottom, #CD7F32, #A0622E); }
+    .result-card.rank-1::before { background: linear-gradient(to bottom, #ffd700, #ffaa00); }
+    .result-card.rank-2::before { background: linear-gradient(to bottom, #c0c0c0, #a0a0a0); }
+    .result-card.rank-3::before { background: linear-gradient(to bottom, #cd7f32, #a0622e); }
     .result-card:hover {
-        border-color: #FF8C00;
-        box-shadow: 0 6px 20px rgba(255, 140, 0, 0.15);
-        transform: translateY(-2px);
+        border-color: rgba(102, 126, 234, 0.25);
+        box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        transform: translateY(-1px);
     }
     .result-rank {
         font-size: 0.75rem;
@@ -220,21 +160,21 @@ st.markdown("""
         letter-spacing: 0.08em;
         margin-bottom: 8px;
     }
-    .rank-1 .result-rank { color: #FF8C00; }
-    .rank-2 .result-rank { color: #A0A0A0; }
-    .rank-3 .result-rank { color: #CD7F32; }
+    .rank-1 .result-rank { color: #ffd700; }
+    .rank-2 .result-rank { color: #c0c0c0; }
+    .rank-3 .result-rank { color: #cd7f32; }
     .result-score {
         font-family: 'JetBrains Mono', monospace;
         font-size: 1.6rem;
         font-weight: 700;
-        background: linear-gradient(135deg, #FF8C00, #E85D04);
+        background: linear-gradient(135deg, #667eea, #764ba2);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 12px;
     }
     .result-type {
         display: inline-block;
-        background: linear-gradient(135deg, #FF8C00, #E85D04);
+        background: linear-gradient(135deg, #667eea, #764ba2);
         color: white;
         padding: 4px 14px;
         border-radius: 100px;
@@ -249,7 +189,7 @@ st.markdown("""
         margin-bottom: 14px;
     }
     .meta-item {
-        background: #f8f9fa;
+        background: rgba(255,255,255,0.04);
         border-radius: 10px;
         padding: 10px 14px;
         text-align: center;
@@ -258,26 +198,26 @@ st.markdown("""
         font-size: 0.68rem;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        color: #7f8c8d;
+        color: rgba(255,255,255,0.4);
         margin-bottom: 2px;
     }
     .meta-value {
         font-size: 0.88rem;
         font-weight: 600;
-        color: #2c3e50;
+        color: #e0e6ff;
     }
     .result-desc {
         font-size: 0.88rem;
-        color: #555;
+        color: rgba(255,255,255,0.65);
         line-height: 1.6;
-        border-top: 1px solid #eee;
+        border-top: 1px solid rgba(255,255,255,0.06);
         padding-top: 14px;
     }
 
     /* ── Prediction Banner ── */
     .prediction-banner {
-        background: linear-gradient(135deg, rgba(255,140,0,0.08), rgba(232,93,4,0.08));
-        border: 1px solid rgba(255,140,0,0.3);
+        background: linear-gradient(135deg, rgba(102,126,234,0.15), rgba(118,75,162,0.15));
+        border: 1px solid rgba(102,126,234,0.25);
         border-radius: 16px;
         padding: 24px 28px;
         margin-bottom: 24px;
@@ -288,13 +228,13 @@ st.markdown("""
         font-size: 0.78rem;
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        color: #7f8c8d;
+        color: rgba(255,255,255,0.5);
         margin-bottom: 6px;
     }
     .prediction-value {
         font-size: 1.8rem;
         font-weight: 800;
-        background: linear-gradient(135deg, #FF8C00, #E85D04);
+        background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
@@ -309,37 +249,37 @@ st.markdown("""
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: #f8f9fa;
+        background: rgba(255,255,255,0.04);
         border-radius: 12px;
         padding: 14px 20px;
         margin-top: 16px;
     }
     .alpha-label {
         font-size: 0.82rem;
-        color: #7f8c8d;
+        color: rgba(255,255,255,0.5);
     }
     .alpha-value {
         font-family: 'JetBrains Mono', monospace;
         font-weight: 700;
         font-size: 1.1rem;
-        color: #FF8C00;
+        color: #e0e6ff;
     }
 
     /* ── Footer ── */
     .app-footer {
         margin-top: 60px;
         padding: 30px 0;
-        border-top: 1px solid rgba(255, 140, 0, 0.15);
+        border-top: 1px solid rgba(255,255,255,0.06);
         text-align: center;
     }
     .app-footer p {
-        color: #7f8c8d;
+        color: rgba(255,255,255,0.3);
         font-size: 0.82rem;
         margin: 4px 0;
     }
     .app-footer .footer-brand {
         font-weight: 700;
-        background: linear-gradient(135deg, #FF8C00, #E85D04);
+        background: linear-gradient(135deg, #667eea, #764ba2);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
@@ -352,79 +292,93 @@ st.markdown("""
         flex-wrap: wrap;
     }
     .stat-pill {
-        background: #ffffff;
-        border: 1px solid rgba(255, 140, 0, 0.2);
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
         border-radius: 100px;
         padding: 8px 20px;
         display: flex;
         align-items: center;
         gap: 8px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
     }
     .stat-pill .stat-num {
         font-family: 'JetBrains Mono', monospace;
         font-weight: 700;
         font-size: 0.95rem;
-        color: #FF8C00;
+        color: #e0e6ff;
     }
     .stat-pill .stat-label {
         font-size: 0.78rem;
-        color: #7f8c8d;
+        color: rgba(255,255,255,0.4);
     }
 
     /* ── Streamlit Widget Tweaks ── */
     div[data-baseweb="textarea"] {
-        background-color: #ffffff !important;
-        border: 1px solid rgba(255, 140, 0, 0.2) !important;
+        background-color: #1b263b !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
         border-radius: 14px !important;
+    }
+    div[data-baseweb="textarea"] > div {
+        background-color: transparent !important;
     }
     .stTextArea textarea {
         background-color: transparent !important;
-        color: #2c3e50 !important;
+        color: #ffffff !important;
         font-family: 'Inter', sans-serif !important;
         font-size: 0.95rem !important;
         padding: 16px !important;
+        -webkit-text-fill-color: #ffffff !important;
     }
     .stTextArea textarea::placeholder {
-        color: #bdc3c7 !important;
+        color: rgba(255,255,255,0.5) !important;
+        -webkit-text-fill-color: rgba(255,255,255,0.5) !important;
+    }
+    .stTextArea textarea:focus {
+        border-color: transparent !important;
+        box-shadow: none !important;
     }
     div[data-baseweb="textarea"]:focus-within {
-        border-color: #FF8C00 !important;
-        box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.15) !important;
+        border-color: rgba(102,126,234,0.5) !important;
+        box-shadow: 0 0 0 2px rgba(102,126,234,0.25) !important;
+    }
+    .stSlider > div > div {
+        background: rgba(255,255,255,0.06) !important;
     }
     div.stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, #FF8C00 0%, #E85D04 100%) !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
         color: white !important;
         border: none !important;
         border-radius: 14px !important;
         padding: 14px 28px !important;
         font-weight: 700 !important;
         font-size: 1rem !important;
+        letter-spacing: 0.02em !important;
         transition: all 0.3s ease !important;
-        box-shadow: 0 4px 20px rgba(255, 140, 0, 0.3) !important;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3) !important;
     }
     div.stButton > button[kind="primary"]:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 8px 30px rgba(255, 140, 0, 0.45) !important;
+        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.45) !important;
     }
 
+    /* ── Section Headers ── */
     .section-header {
         font-size: 1.1rem;
         font-weight: 700;
-        color: #2c3e50;
+        color: #e0e6ff;
         margin-bottom: 16px;
         padding-bottom: 10px;
-        border-bottom: 2px solid #FF8C00;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
     }
 
+    /* ── Formula Display ── */
     .formula-box {
-        background: #f8f9fa;
-        border: 1px solid rgba(255, 140, 0, 0.2);
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
         border-radius: 12px;
         padding: 16px 20px;
         font-family: 'JetBrains Mono', monospace;
         font-size: 0.9rem;
-        color: #FF8C00;
+        color: #c5ceff;
         text-align: center;
         margin-bottom: 20px;
     }
@@ -520,46 +474,40 @@ def hybrid_search(query, alpha=0.4, top_k=5):
 
 
 # ======================================================================
-# DISTINCT DARK ORANGE HEADER
+# HERO BANNER
 # ======================================================================
 st.markdown("""
-<div class="modern-header">
-    <div class="header-top">
-        <div class="title-section">
-            <h1>HSRIS</h1>
-            <div class="tagline">Hybrid Semantic Retrieval &amp; Intelligence System</div>
-        </div>
-        <div class="badge-cloud">
-            <span class="tech-badge">🔥 PyTorch</span>
-            <span class="tech-badge">✨ GloVe 300D</span>
-            <span class="tech-badge">📊 TF-IDF</span>
-            <span class="tech-badge">⚡ Dual Encoder</span>
-            <span class="name-badge">👩‍💻 Maryam Shehzadi (23F-3030)</span>
-        </div>
-    </div>
-    <div class="header-footer">
-        <div class="system-title">⚙️ <span>Hybrid Retrieval Engine</span> · Keyword + Semantic Fusion</div>
-        <div class="pill-status">● Production Ready</div>
+<div class="hero-banner">
+    <h1>HSRIS</h1>
+    <p class="subtitle">Hybrid Semantic Retrieval and Intelligence System</p>
+    <div class="badge-row">
+        <span class="hero-badge">PyTorch</span>
+        <span class="hero-badge">GloVe 300D</span>
+        <span class="hero-badge">TF-IDF</span>
+        <span class="hero-badge">Dual GPU</span>
+        <span class="hero-badge">Ali Naqi (23F-3052)</span>
+        <span class="hero-badge">Muhammad Aamir (23F-3073)</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ── Stats Pills (Removed SE-6B)
+# ── Stats Pills ──
 n_tickets = len(df)
 n_vocab = TOP_K
 n_emb = EMB_DIM
 st.markdown(f"""
 <div class="stats-row">
-    <div class="stat-pill"><span class="stat-num">{n_tickets:,}</span><span class="stat-label">Resolutions Indexed</span></div>
-    <div class="stat-pill"><span class="stat-num">{n_vocab:,}</span><span class="stat-label">Vocabulary Terms</span></div>
-    <div class="stat-pill"><span class="stat-num">{n_emb}D</span><span class="stat-label">Embedding Dimension</span></div>
+    <div class="stat-pill"><span class="stat-num">{n_tickets:,}</span><span class="stat-label">tickets indexed</span></div>
+    <div class="stat-pill"><span class="stat-num">{n_vocab:,}</span><span class="stat-label">vocabulary tokens</span></div>
+    <div class="stat-pill"><span class="stat-num">{n_emb}D</span><span class="stat-label">GloVe embeddings</span></div>
+    <div class="stat-pill"><span class="stat-num">SE-6B</span><span class="stat-label">batch</span></div>
 </div>
 """, unsafe_allow_html=True)
 
 # ── Formula ──
 st.markdown("""
 <div class="formula-box">
-    <b>Hybrid Score</b> = α × Cosine Similarity (Keyword) + (1 - α) × Cosine Similarity (Semantic)
+    FinalScore = &alpha; &times; CosineSim(TF-IDF) + (1 - &alpha;) &times; CosineSim(GloVe)
 </div>
 """, unsafe_allow_html=True)
 
@@ -570,28 +518,28 @@ st.markdown("""
 col1, col2 = st.columns([2.5, 1])
 
 with col1:
-    st.markdown('<div class="glass-card"><h3>📝 Describe Your Issue</h3><div class="card-subtitle">Enter a customer support query to find similar resolved tickets from our knowledge base</div></div>', unsafe_allow_html=True)
-    query = st.text_area("Query", height=130, placeholder="Example: Unable to access my account, password recovery email not arriving...", label_visibility="collapsed")
+    st.markdown('<div class="glass-card"><h3>Enter Ticket Description</h3><div class="card-subtitle">Type or paste a customer support ticket to find similar past resolutions</div></div>', unsafe_allow_html=True)
+    query = st.text_area("Query", height=130, placeholder="e.g. I cannot login to my account, password reset not working...", label_visibility="collapsed")
 
 with col2:
-    st.markdown('<div class="glass-card"><h3>⚙️ Search Configuration</h3><div class="card-subtitle">Balance between keyword matching and semantic understanding</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="glass-card"><h3>Search Parameters</h3><div class="card-subtitle">Adjust the hybrid weighting</div></div>', unsafe_allow_html=True)
     alpha = st.slider("Alpha", 0.0, 1.0, 0.4, 0.05, label_visibility="collapsed")
     tfidf_pct = str(int(alpha * 100)) + "%"
     glove_pct = str(int((1 - alpha) * 100)) + "%"
     st.markdown(f"""
     <div class="alpha-bar">
         <div>
-            <div class="alpha-label">Keyword Match (TF-IDF)</div>
+            <div class="alpha-label">TF-IDF (Keyword)</div>
             <div class="alpha-value">{tfidf_pct}</div>
         </div>
         <div>
-            <div class="alpha-label">Semantic Match (GloVe)</div>
+            <div class="alpha-label">GloVe (Semantic)</div>
             <div class="alpha-value">{glove_pct}</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-search_clicked = st.button("🔍 Find Similar Tickets", type="primary", use_container_width=True)
+search_clicked = st.button("Search", type="primary", use_container_width=True)
 
 
 # ======================================================================
@@ -603,14 +551,14 @@ if search_clicked and query.strip():
     # Prediction Banner
     st.markdown(f"""
     <div class="prediction-banner">
-        <div class="prediction-label">🎯 Predicted Ticket Category</div>
+        <div class="prediction-label">Predicted Ticket Type</div>
         <div class="prediction-value">{predicted_type}</div>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="section-header">📋 Top 3 Similar Resolutions</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Top 3 Similar Past Resolutions</div>', unsafe_allow_html=True)
 
-    rank_labels = ["🥇 Best Match", "🥈 Second Match", "🥉 Third Match"]
+    rank_labels = ["1st Match", "2nd Match", "3rd Match"]
     for i, (_, row) in enumerate(results.iterrows()):
         rank_class = f"rank-{i+1}"
         score_val = f"{row['Score']:.4f}"
@@ -644,9 +592,9 @@ if search_clicked and query.strip():
 # ======================================================================
 st.markdown("""
 <div class="app-footer">
-    <p><span class="footer-brand">HSRIS</span> — Hybrid Semantic Retrieval &amp; Intelligence System</p>
-    <p>Data Science for Software Engineering | Assignment 3 | Section SE-6B</p>
-    <p>Developed by <strong>Maryam Shehzadi (23F-3030)</strong></p>
-    <p>Built with PyTorch, GloVe Embeddings, and Streamlit</p>
+    <p><span class="footer-brand">HSRIS</span> &mdash; Hybrid Semantic Retrieval and Intelligence System</p>
+    <p>Assignment 3 | Data Science for Software Engineering | SE-6B</p>
+    <p>Ali Naqi (23F-3052) &bull; Muhammad Aamir (23F-3073)</p>
+    <p>Built with PyTorch, GloVe, and Streamlit</p>
 </div>
 """, unsafe_allow_html=True)
