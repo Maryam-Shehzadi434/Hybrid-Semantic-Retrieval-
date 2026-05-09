@@ -4,6 +4,13 @@ A lightweight NLP-based semantic retrieval system developed for customer support
 
 ---
 
+## Live Demo
+
+🚀 **Access the live application here:**  
+👉 [https://5hdvfov4sgpyuyn2kk38du.streamlit.app/](https://5hdvfov4sgpyuyn2kk38du.streamlit.app/)
+
+---
+
 ## Overview
 
 This project implements a hybrid retrieval approach that combines:
